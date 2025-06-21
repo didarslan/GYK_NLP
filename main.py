@@ -161,7 +161,7 @@ corpus = [
     "Eğlenceli projeler yapıyoruz",
 ]
 
-import gensim 
+import gensim.downloader
 from gensim.models import Word2Vec
 from nltk.tokenize import word_tokenize
 
