@@ -1,4 +1,4 @@
-# main.py
+# NLP nedir?
 
 # NLP ile neler yapıyoruz? => 
 # Metin Sınıflandırma -> E posta spam mı değil mi?
@@ -9,7 +9,9 @@
 # Named Entity Recognition
 
 
+
 # Bölüm 1 Müfredat Konuları
+
 
 # Kütüphaneler -> numpy/pandas 
 # NLTK => Temel nlp işlemleri yapan.
@@ -17,7 +19,7 @@
 
 
 import nltk 
-nltk.download('punkt_tab') # punkt_tab => Tokenizer
+#nltk.download('punkt_tab') # punkt_tab => Tokenizer
 
 text = "Natural Language Processing is a branch of artificial intelligence."
 
@@ -31,7 +33,7 @@ print(tokens)
 # Stop-Word Removal
 # is,the,on,at,in
 from nltk.corpus import stopwords
-nltk.download('stopwords')
+#nltk.download('stopwords')
 
 stop_words = set(stopwords.words('english')) #Dosyadaki kelimeleri oku.
 filtered_tokens = [word for word in tokens if word not in stop_words]
@@ -41,7 +43,7 @@ print(filtered_tokens)
 # Lemmatization -> Kök haline getirme
 # running -> run
 from nltk.stem import WordNetLemmatizer
-nltk.download('wordnet')
+#nltk.download('wordnet')
 
 lemmatizer = WordNetLemmatizer()
 # v =>verb -> fiil
@@ -52,7 +54,7 @@ print(lemmatizer.lemmatize('running', pos='n'))
 
 
 # Pos tagging => Part of Speech Tagging
-nltk.download('averaged_perceptron_tagger_eng')
+#nltk.download('averaged_perceptron_tagger_eng')
 from nltk import pos_tag
 
 pos_tags = pos_tag(filtered_tokens)
@@ -61,8 +63,8 @@ print(pos_tags)
 
 
 # NER => Named Entity Recognition
-nltk.download('maxent_ne_chunker_tab')
-nltk.download('words')
+#nltk.download('maxent_ne_chunker_tab')
+#nltk.download('words')
 
 from nltk import ne_chunk
 tree = ne_chunk(pos_tags)
@@ -137,37 +139,120 @@ corpus = [
     "AI is changing the world.",
     "AI is a branch of computer science.",
 ]
+#
 
-# Word Embeddings
-from sklearn.feature_extraction.text import TfidfVectorizer
+# N-gram Modeller , Word Embeddings
 
-# Her kelimeye sayısal bir vektör atamak için kullanılır. 
-# Bu vektörler, kelimelerin anlamını ve bağlamını yakalamaya çalışır.
-# Aynı bağlamdaki kelimeler, uzayda birbirine yakın vektörlere sahip olur.
+# N-gram Modeller
 
-# Araba [0.1, 0.2, 0.3........, 0.9] 100 veya 300 boyutlu bir vektör.
+# Bir metindeki kelimelerin (ya da karakterlerin) ardışık gruplar halinde oluşturulmasıdır.
 
-# Ek özellik = Vektör cebiri yapılabilir
+# NLP çok eğlenceli alan
+# Unigram-Bigram-Trigram 
 
-# vec("king") - vec("man") + vec("women") = vec("queen")
 
-# Nerede kullanılır?
-# 1- Chatbotlar
-# 2- Semantic search (Anlamlı arama)
+# Unigram (1n) = ["NLP", "çok", "eğlenceli", "alan"]
+# Bigram (2n) = ["NLP çok", "çok eğlenceli", "eğlenceli alan"]
+# Trigram (3n) = ["NLP çok eğlenceli", "çok eğlenceli alan"]
+
+# Otomatik tamamlama, spam tespiti, yazım önerisi.
+# Nerede kullanılır? => Dilin anlamını anlamaz. Sadece istatistiksel olarak kullanılır.
+
+# Apple is a fruit.
+# Apple is a company.
 
 corpus = [
-    "NLP çok eğlenceli bir alandır.",
+    "NLP çok eğlenceli alan",
     "Doğal dil işleme çok önemli",
-    "Eğlenceli projeler yapıyoruz",
+    "Eğlenceli projeler yapıyoruz"
 ]
 
-import gensim.downloader
+from sklearn.feature_extraction.text import TfidfVectorizer
+# Unigram ve Bigram birlikte kullanılır.
+vectorizer = TfidfVectorizer(ngram_range=(1,2), lowercase=True)
+
+X = vectorizer.fit_transform(corpus)
+
+print(f"Feature Names: {vectorizer.get_feature_names_out()}")
+print(f"X: {X.toarray()}")
+
+# Word Embedding
+# Her kelimeye sayısal bir vektör ata. Bu vektörler sayesinde:
+# Kelimeler arasındaki anlamsal yakınlık öğreniliyor.
+# Aynı bağlam geçen kelimeler, uzayda da birbirine yakın olur.
+
+# Araba -> [0.21, -0.43, 0.92, ........, 0.01] 100 veya 300+ boyutlu.
+
+# Güzel ek özellik => Vektör cebiri bile yapılabilir.
+# vec("king") - vec("man") + vec("woman") = vec("queen")
+
+# Nerede kullanılır? 
+
+# Derin öğrenme.
+# Chatbot, anlamsal arama
+
+corpus = [
+    "NLP çok eğlenceli alan",
+    "Doğal dil işleme çok önemli",
+    "Eğlenceli projeler yapıyoruz"
+]
+import gensim
 from gensim.models import Word2Vec
 from nltk.tokenize import word_tokenize
 
-# Her cümleyi tokenize et kelime listesine çevir
-tokenized_senrtences = [word_tokenize(sentence.lower()) for sentence in corpus]
-print(tokenized_senrtences)
-# Word2Vec Modeli
-model = Word2Vec(sentences=tokenized_senrtences, vector_size=100, window=5, min_count=1, workers=4)
-print(model.wv['nlp'])  # 'eğlenceli' kelimesinin vektör temsili
+#her cümleyi tokenize et. kelime listesi oluştur.
+# kelimeleri parçala, liste haline getir.
+tokenized_sentences = [word_tokenize(sentence.lower()) for sentence in corpus]
+print("******")
+print(tokenized_sentences)
+
+model = Word2Vec(tokenized_sentences, vector_size=100, window=5, min_count=1, workers=2)
+
+print("*******")
+print(model.wv['nlp'])
+print("*******")
+print(model.wv.most_similar('nlp'))
+
+
+# Sentence Embedding
+
+
+corpus = [
+    "NLP çok eğlenceli alan",
+    "NLP çok önemli",
+    "Eğlenceli projeler yapıyoruz"
+]
+tokenized_sentences = [word_tokenize(sentence.lower()) for sentence in corpus]
+
+model = Word2Vec(tokenized_sentences, vector_size=100, window=5, min_count=1, workers=2)
+
+# Ortalama Vektör Alma
+import numpy as np
+
+def sentence_vector(sentence):
+    words = word_tokenize(sentence.lower())
+    vectors = []
+    for word in words:
+        if word in model.wv:
+            vectors.append(model.wv[word])
+    if len(vectors) > 0:
+        return np.mean(vectors, axis=0)
+    return np.zeros(100)
+
+vec1 = sentence_vector(corpus[0])
+vec2 = sentence_vector(corpus[1])
+
+print(vec1)
+print(vec2)
+
+def cosine_similarity(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+# cosinesimilarty(a,b) = a.b / |a| * |b| => -1,1 arasında değer döner.
+#
+# Average Word Embedding
+
+print(cosine_similarity(vec1, vec2))
+
+# Sentence-BERT (SBERT)
+# Sentence-BERT, cümleleri vektörlere dönüştürmek için kullanılan bir modeldir.
